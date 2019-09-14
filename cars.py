@@ -3,6 +3,7 @@ import networkx as nx
 import copy
 from random import sample
 import os
+import pickle
 n_drivers = 200
 equilibrium_steps = 20
 c_traffic = 0.1
