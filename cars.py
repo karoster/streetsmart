@@ -1,13 +1,17 @@
 import osmnx as ox
 import networkx as nx
 import copy
-from random import sample
 import os
 import pickle
-n_drivers = 200
+import igraph as ig
+from random import sample
+import matplotlib.cm as cm
+import matplotlib.colors as colors
+
+n_drivers = 100
 equilibrium_steps = 20
 c_traffic = 0.1
-
+weight = 'length'
 
 MAP_NAME='./map.pkl'
 def load_map(name):
@@ -16,14 +20,13 @@ def load_map(name):
     else:
         G = ox.graph_from_place('Baltimore, Maryland, USA', network_type='drive')
         pickle.dump(G, open(name, 'wb'))
-
     return G
 
 G = load_map(MAP_NAME)
-
 starts = sample(G.nodes(), n_drivers)
-cached = {}
 ends = sample(G.nodes(), n_drivers)
+
+cached = {}
 def edge_str(a, b):
     return str(a) + "," + str(b)
 
@@ -41,7 +44,8 @@ for step in range(equilibrium_steps):
     for driver_id, (start, end) in enumerate(zip(starts, ends)):
         try:
             path = nx.shortest_path(G_new, start, end, 'length')
-            total_cost += nx.shortest_path_length(G_new, start, end, 'length')
+            if str(driver_path[driver_id]) == str(path):
+                continue
         except Exception as e:
             path = []
         for node_a, node_b in zip(path[:-1], path[1:]):
@@ -60,5 +64,12 @@ for step in range(equilibrium_steps):
             lanes = 1
             if 'lanes' in G[node_a][node_b][0]:
                 lanes = int(G[node_a][node_b][0]['lanes'][0])
-            G_new[node_a][node_b][0]['length'] =  original_length(node_a, node_b) * (1 + edges_used[cur_edge] * c_traffic / lanes)
-    print(step, total_cost)
+            G_new[node_a][node_b][0]['length'] = original_length(node_a, node_b) * (1 + edges_used[cur_edge] * c_traffic / lanes)
+
+    ev = [G_new[node_a][node_b][0]['length'] / G[node_a][node_b][0]['length'] for node_a, node_b in G.edges()]
+    norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
+    cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
+    ec = [cmap.to_rgba(cl) for cl in ev]
+    fig, ax = ox.plot_graph(G, bgcolor='k', axis_off=True, node_size=0, edge_color=ec,
+        edge_linewidth=1.5, edge_alpha=1, save=True, show=False, filename=str(step) + "cars")
+    print(step)
