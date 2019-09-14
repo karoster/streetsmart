@@ -2,10 +2,24 @@ import osmnx as ox
 import networkx as nx
 import copy
 from random import sample
+import os
 n_drivers = 200
 equilibrium_steps = 20
 c_traffic = 0.1
-G = ox.graph_from_place('Baltimore, Maryland, USA', network_type='drive')
+
+
+MAP_NAME='./map.pkl'
+def load_map(name):
+    if os.path.exists(name):
+        G = pickle.load(open(name, 'rb'))
+    else:
+        G = ox.graph_from_place('Baltimore, Maryland, USA', network_type='drive')
+        pickle.dump(G, open(name, 'wb'))
+
+    return G
+
+G = load_map(MAP_NAME)
+
 starts = sample(G.nodes(), n_drivers)
 cached = {}
 ends = sample(G.nodes(), n_drivers)
