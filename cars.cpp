@@ -62,6 +62,9 @@ public:
 
     void write(const string& outfile) {
         ofstream out(outfile);
+
+        out << energy() << endl;
+
         for (const vector<Edge>& e : edges) {
             for (const auto& edge : e) {
                 out << edge.n1 << ' ' << edge.n2 << ' ' << edge.count << ' ' << edge.time() << endl;
