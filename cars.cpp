@@ -22,6 +22,7 @@ public:
     int lanes;
     double length;
     Edge(string line) {
+        count = 0;
         sscanf(line.c_str(), "%d %d %lf %d", &n1, &n2, &length, &lanes);
     }
 };
@@ -57,8 +58,7 @@ Graph::Graph(const string& filename)
     getline(infile, line);
 
     istringstream iss(line);
-    int N;
-    iss >> N;
+    iss >> V;
 
     for (int i = 0; i < V; i++) {
         vector<Edge> v;
@@ -177,6 +177,7 @@ int main()
     for (int i = 0; i < NUM_DRIVERS;i++) {
         srcs.push_back(distribution(generator));
         dests.push_back(distribution(generator));
+        paths.push_back(vector<Edge*>());
     }
 
     for (int i = 0; i < EQUILIBRIUM_ITERATIONS; i++) {
@@ -184,7 +185,9 @@ int main()
             vector<Edge*> shortest;
             g.shortestPath(srcs[j], dests[j], shortest);
             for (Edge* e : paths[j]) {
-                e->count--;
+                if (e->count > 0) {
+                    e->count--;
+                }
             }
             for (Edge* e : shortest) {
                 e->count++;
