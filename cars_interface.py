@@ -23,7 +23,7 @@ def visualize_file(filename, index_to_nodes):
     return true_results
 
 
-def get_removable_streets(address, car_count=1000, streets_to_remove=20):
+def get_removable_streets(address, car_count=1000, streets_to_remove=200):
     # Strip the address to alphanumeric only
     stripped_address = "".join(x for x in str.lower(address) if x.isalnum())
 
@@ -100,18 +100,18 @@ def vals_to_colors(vals):
     ev = vals
     norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
     cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
-    ec = [cmap.to_rgba(cl) for cl in ev]
+    ec = ['#{:02x}{:02x}{:02x}{:02x}'.format(*[int(colo * 255) for colo in cmap.to_rgba(cl)]) for cl in ev]
     return ec
 
 
 def get_plot(address):
     orig_results, true_results, removed, G = get_removable_streets(address)
     cols = vals_to_colors([(orig_results[node_str(node_a, node_b)] if node_str(node_a, node_b) in orig_results else 0) for (node_a, node_b) in G.edges()])
-    
+
     for i, (node_a, node_b) in enumerate(G.edges()):
         if node_str(node_a, node_b) not in true_results:
             cols[i] = 'green'
-    
+
     gdf_edges = ox.graph_to_gdfs(G, nodes=False, fill_edge_geometry=True)
     gdf_edges['edge_color'] = cols
     return ox.plot_graph_folium(gdf_edges)
