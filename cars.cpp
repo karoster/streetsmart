@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <random>
+#include <algorithm>
 
 using namespace std; 
 # define INF 0x3f3f3f3f
@@ -20,6 +21,9 @@ public:
 
     double time() { 
         return length * (1.0 + count * 0.01 / lanes);
+    }
+    double time_total() { 
+        return length * (1.0 + max(0, (count - 1)) * 0.01 / lanes);
     }
     int lanes;
     double length;
@@ -51,6 +55,10 @@ public:
     // prints shortest path from s 
     double shortestPath(int src, int dest, vector<Edge*>& path);
     double energy();
+
+    void addDriver(int start, int end) {
+        drivers.push_back(Driver{start, end});
+    }
 }; 
   
 // Allocates memory for adjacency list 
@@ -90,7 +98,11 @@ double Graph::energy() {
 
         vector<Edge*> p;
 
-        e += shortestPath(d.start, d.end, p);
+        double length = shortestPath(d.start, d.end, p);
+        if (std::isinf(length)) {
+            continue;
+        }
+        e += length;
     }
 
     return e;
@@ -139,7 +151,7 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
             while (i != src) {
                 if (backward_edges[i] != nullptr) {
                     path.push_back(backward_edges[i]);
-                    cost += backward_edges[i]->time();
+                    cost += backward_edges[i]->time_total();
                     i = backward[i];
                 }
             }
@@ -162,36 +174,46 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
     }
 
     return numeric_limits<double>::infinity();
-} 
+}
   
-// Driver program to test methods of graph class 
-int main() 
-{
-    Graph g("graph.txt");
 
-    const int EQUILIBRIUM_ITERATIONS = 100;
-    const int NUM_DRIVERS = 100;
+double greedy_simulation(Graph& g, int num_drivers) {
+    
+    cout << "Greedy" << endl;
 
+    vector<Edge*> path;
+
+    const int EQUILIBRIUM_ITERATIONS = 6;
     vector<int> srcs;
     vector<int> dests;
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0, g.num_nodes() - 1);
     vector< vector<Edge*> > paths;
 
-    for (int i = 0; i < NUM_DRIVERS;i++) {
+    for (int i = 0; i < num_drivers;i++) {
         srcs.push_back(distribution(generator));
         dests.push_back(distribution(generator));
         paths.push_back(vector<Edge*>());
+
+        g.addDriver(srcs[i], dests[i]);
     }
 
     for (int i = 0; i < EQUILIBRIUM_ITERATIONS; i++) {
-        for (int j = 0; j < NUM_DRIVERS; j++) {
+        for (int j = 0; j < num_drivers; j++) {
             vector<Edge*> shortest;
-            g.shortestPath(srcs[j], dests[j], shortest);
             for (Edge* e : paths[j]) {
                 if (e->count > 0) {
                     e->count--;
                 }
+            }
+            double res = g.shortestPath(srcs[j], dests[j], shortest);
+            if (std::isinf(res)) {
+                for (Edge* e : paths[j]) {
+                    if (e->count > 0) {
+                        e->count++;
+                    }
+                }
+                continue;
             }
             for (Edge* e : shortest) {
                 e->count++;
@@ -200,6 +222,13 @@ int main()
         }
         cout << g.energy() << endl;
     }
+    return g.energy();
+}
 
+// Driver program to test methods of graph class 
+int main(int argc, char** argv) 
+{
+    Graph g("harbor.txt");
+    greedy_simulation(g, 1000);
     return 0; 
 } 
