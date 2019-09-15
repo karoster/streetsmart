@@ -84,17 +84,19 @@ def get_removable_streets(address, car_count=1000, streets_to_remove=200):
         p.wait()
 
     results = []
+    to_remove = []
     for (NODE_A, NODE_B, street_car_count, SLOWDOWN) in f_lines[:streets_to_remove]:
         OUT_FILE = f'texts/{stripped_address}_{car_count}_{NODE_A}_{NODE_B}_out.txt'
         with open(OUT_FILE) as f:
             cost_removed = float(f.readline())
             results.append([round((cost_removed - total_cost) / total_cost, 3), node_str(NODE_A, NODE_B)])
+            if cost_removed < total_cost:
+                to_remove.append(node_str(index_to_nodes[int(NODE_A)], index_to_nodes[int(NODE_B)]))
     best_node_a, best_node_b = min(results)[1].split(",")
-    print(min(results)[0])
     OUT_FILE = f'texts/{stripped_address}_{car_count}_{best_node_a}_{best_node_b}_out.txt'
     true_results = visualize_file(OUT_FILE, index_to_nodes)
-
-    return orig_results, true_results, (best_node_a, best_node_b), G
+    best_improvement = -min(results)[0]
+    return orig_results, true_results, to_remove, best_improvement, G
 
 def vals_to_colors(vals):
     ev = vals
@@ -105,13 +107,13 @@ def vals_to_colors(vals):
 
 
 def get_plot(address):
-    orig_results, true_results, removed, G = get_removable_streets(address)
+    orig_results, true_results, to_remove, best_improvement, G = get_removable_streets(address)
     cols = vals_to_colors([(orig_results[node_str(node_a, node_b)] if node_str(node_a, node_b) in orig_results else 0) for (node_a, node_b) in G.edges()])
 
     for i, (node_a, node_b) in enumerate(G.edges()):
-        if node_str(node_a, node_b) not in true_results:
-            cols[i] = 'green'
+        if node_str(node_a, node_b) in to_remove:
+            cols[i] = '#73db67'
 
     gdf_edges = ox.graph_to_gdfs(G, nodes=False, fill_edge_geometry=True)
     gdf_edges['edge_color'] = cols
-    return ox.plot_graph_folium(gdf_edges)
+    return ox.plot_graph_folium(gdf_edges), best_improvement

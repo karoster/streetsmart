@@ -13,9 +13,8 @@ app = Flask(__name__, template_folder='front')
 @app.route('/index')
 def index():
     address = request.args.get('address')
-    print(address)
-    fplot = get_plot(address)
-    return render_template('index.html', title='Home', folium=fplot._repr_html_())
+    fplot, best_improvement = get_plot(address)
+    return render_template('index.html', title='Home', folium=fplot._repr_html_(), best_improvement=best_improvement * 100)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
