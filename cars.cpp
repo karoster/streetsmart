@@ -205,6 +205,7 @@ double greedy_simulation(Graph& g, int num_drivers) {
     vector<int> srcs;
     vector<int> dests;
     std::default_random_engine generator;
+    generator.seed(3141);
     std::uniform_int_distribution<int> distribution(0, g.num_nodes() - 1);
     vector< vector<Edge*> > paths;
 
