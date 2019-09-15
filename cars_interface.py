@@ -58,7 +58,7 @@ def get_removable_streets(address, car_count=1000, streets_to_remove=200):
                 f.write('{} {} {} {}\n'.format(nodes_to_index[a], nodes_to_index[b], G[a][b][0]['length'], lanes))
 
     # Original cost
-    OUT_FILE_GEN = f'{stripped_address}_{car_count}_gen.txt'
+    OUT_FILE_GEN = f'texts/{stripped_address}_{car_count}_gen.txt'
     overall = Popen(shlex.split(f'./cars {IN_FILE} {OUT_FILE_GEN} {car_count} -1 -1'))
     overall.wait()
     orig_results = visualize_file(OUT_FILE_GEN, index_to_nodes)
