@@ -125,6 +125,9 @@ double Graph::energy() {
     return e;
 }
   
+bool comp(const pair<double, int>& a, const pair<double, int>& b) {
+    return a.first > b.first;
+}
 // Prints shortest paths from src to all other vertices 
 double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
 { 
@@ -132,7 +135,7 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
     // are being preprocessed. This is weird syntax in C++. 
     // Refer below link for details of this syntax 
     // https://www.geeksforgeeks.org/implement-min-heap-using-stl/ 
-    priority_queue< double, vector < pair<double, int> > , greater< double > > pq; 
+    priority_queue< pair<double, int>, vector < pair<double, int> > , decltype(&comp)> pq(comp); 
   
     const int V = edges.size();
 
