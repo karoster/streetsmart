@@ -22,4 +22,4 @@ def index():
     return render_template('index.html', title='Home', folium=graph_map._repr_html_())
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=80)
