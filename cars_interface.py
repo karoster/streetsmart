@@ -101,6 +101,7 @@ def vals_to_colors(vals):
     norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
     cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
     ec = [cmap.to_rgba(cl) for cl in ev]
+    return ec
 
 
 def get_plot(address):
@@ -113,3 +114,4 @@ def get_plot(address):
     
     gdf_edges = ox.graph_to_gdfs(G, nodes=False, fill_edge_geometry=True)
     gdf_edges['edge_color'] = cols
+    return ox.plot_graph_folium(gdf_edges)
