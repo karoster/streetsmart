@@ -136,9 +136,7 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
   
     const int V = edges.size();
 
-    // Create a vector for distances and initialize all 
-    // distances as infinite (INF) 
-    vector<double> dist(V, INF);
+    vector<double> dist(V, numeric_limits<double>::infinity());
     vector<int> backward(V, -1);
     vector<Edge*> backward_edges(V, nullptr);
   
