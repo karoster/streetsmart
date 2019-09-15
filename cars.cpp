@@ -112,14 +112,14 @@ double Graph::energy() {
     double e = 0;
 
     for (Driver d : drivers) {
-
         vector<Edge*> p;
-
         double length = shortestPath(d.start, d.end, p);
         if (std::isinf(length)) {
-            continue;
+            e += 10000;
         }
-        e += length;
+        else {
+            e += length;
+        }
     }
 
     return e;
