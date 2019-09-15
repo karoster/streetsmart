@@ -1,6 +1,9 @@
 // Program to find Dijkstra's shortest path using 
 // priority_queue in STL 
-#include<bits/stdc++.h> 
+#include <vector>
+#include <queue>
+#include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <random>
@@ -10,8 +13,6 @@ using namespace std;
 # define INF 0x3f3f3f3f
 
 const int MAX_DEGREE = 100;
-  
-typedef pair<int, int> iPair; 
   
 struct Edge {
 public:
@@ -131,7 +132,7 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
     // are being preprocessed. This is weird syntax in C++. 
     // Refer below link for details of this syntax 
     // https://www.geeksforgeeks.org/implement-min-heap-using-stl/ 
-    priority_queue< double, vector <iPair> , greater<iPair> > pq; 
+    priority_queue< double, vector < pair<double, int> > , greater< pair<double, int> > > pq; 
   
     const int V = edges.size();
 
