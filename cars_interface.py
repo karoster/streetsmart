@@ -3,6 +3,7 @@ import networkx as nx
 import copy
 import os
 import pickle
+import math
 import shlex
 import matplotlib.cm as cm
 import matplotlib.colors as colors
@@ -22,7 +23,7 @@ def visualize_file(filename, index_to_nodes):
     return true_results
 
 
-def get_removable_streets(address, car_count=1000, streets_to_remove=100):
+def get_removable_streets(address, car_count=1000, streets_to_remove=20):
     # Strip the address to alphanumeric only
     stripped_address = "".join(x for x in str.lower(address) if x.isalnum())
 
@@ -89,12 +90,13 @@ def get_removable_streets(address, car_count=1000, streets_to_remove=100):
             cost_removed = float(f.readline())
             results.append([round((cost_removed - total_cost) / total_cost, 3), node_str(NODE_A, NODE_B)])
     best_node_a, best_node_b = min(results)[1].split(",")
+    print(min(results)[0])
     OUT_FILE = f'texts/{stripped_address}_{car_count}_{best_node_a}_{best_node_b}_out.txt'
     true_results = visualize_file(OUT_FILE, index_to_nodes)
 
-    return orig_results, true_results, G
+    return orig_results, true_results, (best_node_a, best_node_b), G
 
-orig_results, true_results, G = get_removable_streets('Downtown Baltimore, Maryland, USA')
+orig_results, true_results, removed, G = get_removable_streets('Baltimore, Maryland, USA')
 
 ev = [(true_results[node_str(node_a, node_b)] if node_str(node_a, node_b) in true_results else 0) for (node_a, node_b) in G.edges()]
 norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
@@ -109,3 +111,16 @@ cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
 ec = [cmap.to_rgba(cl) for cl in ev]
 fig, ax = ox.plot_graph(G, bgcolor='k', axis_off=True, node_size=0, edge_color=ec,
     edge_linewidth=1.5, edge_alpha=1, save=True, show=False, filename="cars_before")
+
+ev = []
+for (node_a, node_b) in G.edges():
+    if node_str(node_a, node_b) in true_results:
+        new_val = true_results[node_str(node_a, node_b)] - orig_results[node_str(node_a, node_b)]
+    else:
+        new_val = math.inf
+    ev.append(new_val)
+norm = colors.Normalize(vmin=0.8*min(ev), vmax=1.2*max([e for e in ev if not math.isinf(e)]))
+cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
+ec = [(cmap.to_rgba(cl) if not math.isinf(cl) else (0.2,0.8,0.8,1)) for cl in ev]
+fig, ax = ox.plot_graph(G, bgcolor='k', axis_off=True, node_size=0, edge_color=ec,
+    edge_linewidth=1.5, edge_alpha=1, save=True, show=False, filename="cars_diff")
