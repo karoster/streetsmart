@@ -96,31 +96,20 @@ def get_removable_streets(address, car_count=1000, streets_to_remove=20):
 
     return orig_results, true_results, (best_node_a, best_node_b), G
 
-orig_results, true_results, removed, G = get_removable_streets('Baltimore, Maryland, USA')
+def vals_to_colors(vals):
+    ev = vals
+    norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
+    cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
+    ec = [cmap.to_rgba(cl) for cl in ev]
 
-ev = [(true_results[node_str(node_a, node_b)] if node_str(node_a, node_b) in true_results else 0) for (node_a, node_b) in G.edges()]
-norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
-cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
-ec = [cmap.to_rgba(cl) for cl in ev]
-fig, ax = ox.plot_graph(G, bgcolor='k', axis_off=True, node_size=0, edge_color=ec,
-    edge_linewidth=1.5, edge_alpha=1, save=True, show=False, filename="cars_after")
 
-ev = [(orig_results[node_str(node_a, node_b)] if node_str(node_a, node_b) in orig_results else 0) for (node_a, node_b) in G.edges()]
-norm = colors.Normalize(vmin=min(ev)*0.8, vmax=max(ev))
-cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
-ec = [cmap.to_rgba(cl) for cl in ev]
-fig, ax = ox.plot_graph(G, bgcolor='k', axis_off=True, node_size=0, edge_color=ec,
-    edge_linewidth=1.5, edge_alpha=1, save=True, show=False, filename="cars_before")
-
-ev = []
-for (node_a, node_b) in G.edges():
-    if node_str(node_a, node_b) in true_results:
-        new_val = true_results[node_str(node_a, node_b)] - orig_results[node_str(node_a, node_b)]
-    else:
-        new_val = math.inf
-    ev.append(new_val)
-norm = colors.Normalize(vmin=0.8*min(ev), vmax=1.2*max([e for e in ev if not math.isinf(e)]))
-cmap = cm.ScalarMappable(norm=norm, cmap=cm.inferno)
-ec = [(cmap.to_rgba(cl) if not math.isinf(cl) else (0.2,0.8,0.8,1)) for cl in ev]
-fig, ax = ox.plot_graph(G, bgcolor='k', axis_off=True, node_size=0, edge_color=ec,
-    edge_linewidth=1.5, edge_alpha=1, save=True, show=False, filename="cars_diff")
+def get_plot(address):
+    orig_results, true_results, removed, G = get_removable_streets(address)
+    cols = vals_to_colors([(orig_results[node_str(node_a, node_b)] if node_str(node_a, node_b) in orig_results else 0) for (node_a, node_b) in G.edges()])
+    
+    for i, (node_a, node_b) in enumerate(G.edges()):
+        if node_str(node_a, node_b) not in true_results:
+            cols[i] = 'green'
+    
+    gdf_edges = ox.graph_to_gdfs(G, nodes=False, fill_edge_geometry=True)
+    gdf_edges['edge_color'] = cols
