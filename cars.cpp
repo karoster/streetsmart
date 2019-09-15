@@ -18,7 +18,7 @@ public:
 
     int count;
 
-    double time() { return length * (1.0 + count * 0.01 / length); }
+    double time() { return length * (1.0 + count * 0.01 / lanes); }
     int lanes;
     double length;
     Edge(string line) {
