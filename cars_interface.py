@@ -39,11 +39,7 @@ def get_removable_streets(address, car_count=1000, streets_to_remove=200):
         nodes_to_index = {n : i for i, n in enumerate(G.nodes())}
         index_to_nodes = {i : n for i, n in enumerate(G.nodes())}
     else:
-        try:
-            G = ox.graph_from_place(address, network_type='drive')
-        except Exception as e:
-            print(e)
-            G = ox.graph_from_address(address, network_type='drive')
+        G = ox.graph_from_address(address, network_type='drive')
         pickle.dump(G, open(IN_PKL, 'wb'))
         with open(IN_FILE, 'w') as f:
             f.write('')
