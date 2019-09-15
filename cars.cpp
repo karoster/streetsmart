@@ -196,9 +196,6 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
   
 
 double greedy_simulation(Graph& g, int num_drivers) {
-    
-    cout << "Greedy" << endl;
-
     vector<Edge*> path;
 
     const int EQUILIBRIUM_ITERATIONS = 6;
@@ -239,7 +236,6 @@ double greedy_simulation(Graph& g, int num_drivers) {
             }
             paths[j] = shortest;
         }
-        cout << g.energy() << endl;
     }
     return g.energy();
 }
