@@ -29,13 +29,16 @@ with open(OUT_FILE, 'w+') as f:
 
     f.write('{}\n'.format(len(G.nodes())))
 
+    nodes_to_index = {n : i for i, n in enumerate(G.nodes())}
+
+
     for a, b in G.edges():
         lanes = 1
         if 'lanes' in G[a][b][0]:
             lanes = G[a][b][0]['lanes']
         if isinstance(lanes, list):
             lanes = int(lanes[0])
-        f.write('{} {} {} {}\n'.format(a, b, G[a][b][0]['length'], lanes))
+        f.write('{} {} {} {}\n'.format(nodes_to_index[a], nodes_to_index[b], G[a][b][0]['length'], lanes))
 
 starts = sample(G.nodes(), n_drivers)
 cached = {}

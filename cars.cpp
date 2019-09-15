@@ -18,7 +18,9 @@ public:
 
     int count;
 
-    double time() { return length * (1.0 + count * 0.01 / lanes); }
+    double time() { 
+        return length * (1.0 + count * 0.01 / lanes);
+    }
     int lanes;
     double length;
     Edge(string line) {
@@ -44,6 +46,8 @@ public:
     // function to add an edge to graph 
     void addEdge(const Edge& e);
   
+    int num_nodes() { return V; }
+
     // prints shortest path from s 
     double shortestPath(int src, int dest, vector<Edge*>& path);
     double energy();
@@ -146,7 +150,7 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
         for (auto& edge : edges[u])
         { 
             //  If there is shorted path to v through u. 
-            if (dist[edge.n1] > dist[edge.n2] + edge.time()) 
+            if (dist[edge.n2] > dist[edge.n1] + edge.time()) 
             {
                 // Updating distance of v
                 dist[edge.n2] = dist[edge.n1] + edge.time();
@@ -171,7 +175,7 @@ int main()
     vector<int> srcs;
     vector<int> dests;
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,NUM_DRIVERS-1);
+    std::uniform_int_distribution<int> distribution(0, g.num_nodes() - 1);
     vector< vector<Edge*> > paths;
 
     for (int i = 0; i < NUM_DRIVERS;i++) {
@@ -192,6 +196,7 @@ int main()
             for (Edge* e : shortest) {
                 e->count++;
             }
+            paths[j] = shortest;
         }
         cout << g.energy() << endl;
     }
