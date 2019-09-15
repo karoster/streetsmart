@@ -132,7 +132,7 @@ double Graph::shortestPath(int src, int dest, vector<Edge*>& path)
     // are being preprocessed. This is weird syntax in C++. 
     // Refer below link for details of this syntax 
     // https://www.geeksforgeeks.org/implement-min-heap-using-stl/ 
-    priority_queue< double, vector < pair<double, int> > , greater< pair<double, int> > > pq; 
+    priority_queue< double, vector < pair<double, int> > , greater< double > > pq; 
   
     const int V = edges.size();
 
