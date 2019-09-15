@@ -19,10 +19,10 @@ public:
 
     int count;
 
-    double time() { 
+    double time() const { 
         return length * (1.0 + count * 0.01 / lanes);
     }
-    double time_total() { 
+    double time_total() const { 
         return length * (1.0 + max(0, (count - 1)) * 0.01 / lanes);
     }
     int lanes;
@@ -45,7 +45,7 @@ class Graph
     vector< vector<Edge> > edges;
     vector<Driver> drivers;
 public: 
-    Graph(const string& filename);  // Constructor 
+    Graph(const string& filename, pair<int, int> exclude_node);  // Constructor 
   
     // function to add an edge to graph 
     void addEdge(const Edge& e);
@@ -59,10 +59,19 @@ public:
     void addDriver(int start, int end) {
         drivers.push_back(Driver{start, end});
     }
+
+    void write(const string& outfile) {
+        ofstream out(outfile);
+        for (const vector<Edge>& e : edges) {
+            for (const auto& edge : e) {
+                out << edge.n1 << ' ' << edge.n2 << ' ' << edge.count << ' ' << edge.time() << endl;
+            }
+        }
+    }
 }; 
   
 // Allocates memory for adjacency list 
-Graph::Graph(const string& filename)
+Graph::Graph(const string& filename, pair<int, int> exclude_node)
 {
     ifstream infile(filename);
     string line;
@@ -80,7 +89,11 @@ Graph::Graph(const string& filename)
 
     while (getline(infile, line))
     {
-        addEdge(Edge(line));
+        Edge e = Edge(line);
+        if (e.n1 == exclude_node.first && e.n2 == exclude_node.second) {
+            continue;
+        }
+        addEdge(e);
     }
 }
   
@@ -228,7 +241,20 @@ double greedy_simulation(Graph& g, int num_drivers) {
 // Driver program to test methods of graph class 
 int main(int argc, char** argv) 
 {
-    Graph g("harbor.txt");
-    greedy_simulation(g, 1000);
+    if (argc < 6) {
+        cerr << "Not enough arguments!" << endl;
+        return -1;
+    }
+
+    string infile(argv[1]);
+    string outfile(argv[2]);
+
+    const int num_cars = atoi(argv[3]);
+    const int node_a = atoi(argv[4]);
+    const int node_b = atoi(argv[5]);
+
+    Graph g(infile, make_pair(node_a, node_b));
+    greedy_simulation(g, num_cars);
+    g.write(outfile);
     return 0; 
 } 
